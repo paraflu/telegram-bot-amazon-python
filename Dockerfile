@@ -6,7 +6,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY amznDocker.py .
+COPY main.py .
 
 # Comando per eseguire il bot
-CMD ["python", "amznDocker.py"]
+CMD ["python", "main.py"]
