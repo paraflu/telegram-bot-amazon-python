@@ -14,9 +14,10 @@ class AliExpressSettings:
     """
 
     # Regex patterns
-    FULL_URL_REGEX = re.compile(r'https?://(([^\s]*)\.)?aliexpress\.([a-z.]{2,5})/item/(?P<asin>\d+).html?.*', re.IGNORECASE)
+    FULL_URL_REGEX = re.compile(r'https?://(([^\s]*)\.)?aliexpress\.([a-z.]{2,5})/item/(?P<asin>\d+).html\?[^\s]*', re.IGNORECASE)
     SHORT_URL_REGEX = re.compile(r'https?://s.click.aliexpress.com/e/([a-zA-Z0-9_]+)', re.IGNORECASE)
     URL_REGEX = re.compile(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)', re.IGNORECASE)
+    STORE = 'AliExpress'
     STORE_TAG = os.environ.get('STORE_TAG')
     STORE_TLD = os.environ.get('STORE_TLD', 'com')
     RAW_URL_REGEX = re.compile(f'https?://(([^\\s]*)\\.)?aliexpress\\.{STORE_TLD}/?([^\\s]*)', re.IGNORECASE)

@@ -50,8 +50,8 @@ class AffiliateMessageHandler:
         new_query = urlencode(query, doseq=True)
         return parsed_url._replace(query=new_query).geturl()
 
-    async def get_affiliate_url(self, affiliate, element):
-        url = affiliate.build_affiliate_url(element['asin']) if element.get(
+    async def get_affiliate_url(self, element):
+        url = element['affiliate'].build_affiliate_url(element['asin']) if element.get(
             'asin') else self.build_raw_affiliate_url(element)
         return await ShortenLinks.shorten_url(url) if ShortenLinks.SHORTEN_LINKS else url
 
@@ -97,11 +97,9 @@ class AffiliateMessageHandler:
         if self.is_group(chat):
             affiliate_message = message
             for element in replacements:
-                for replacement in replacements:
-                    sponsored_url = await self.get_affiliate_url(replacement['affiliate'], element)
-                    affiliate_message = affiliate_message.replace(
-                        element['full_url'], sponsored_url)
-            return AffiliateMessageHandler.GROUP_REPLACEMENT_MESSAGE.replace('\\n', '\n').replace('{USER}', self.build_mention(user)).replace('{STORE}', 'Amazon').replace('{MESSAGE}', affiliate_message).replace('{ORIGINAL_MESSAGE}', message)
+                sponsored_url = await self.get_affiliate_url(element)
+                affiliate_message = affiliate_message.replace(element['full_url'], sponsored_url)
+            return AffiliateMessageHandler.GROUP_REPLACEMENT_MESSAGE.replace('\\n', '\n').replace('{USER}', self.build_mention(user)).replace('{STORE}', replacements[0]['affiliate'].STORE).replace('{MESSAGE}', affiliate_message).replace('{ORIGINAL_MESSAGE}', message)
         else:
             if len(replacements) > 1:
                 text = '\n'.join(f"• {await self.get_affiliate_url(replacements['affiliate'],

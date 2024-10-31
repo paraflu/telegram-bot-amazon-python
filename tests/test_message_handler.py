@@ -67,7 +67,16 @@ class TestMessageHandler(unittest.IsolatedAsyncioTestCase):
             {}
         )
 
-        self.assertEqual(h.last_message, 'Message by name  with Amazon affiliate link:\n\nsee this product! https://it.aliexpress.com/item/1005007703420314.html?tag=TEST_ALI')
+        self.assertEqual(h.last_message, 'Message by name  with AliExpress affiliate link:\n\nsee this product! https://it.aliexpress.com/item/1005007703420314.html?tag=TEST_ALI')
+
+    async def test_aliexpress_and_amazon_link(self):
+        h = MockHandler()
+        await h.handle_message(
+            make_message('you can find on ali https://it.aliexpress.com/item/1005007703420314.html?spm=a2g0o.home.0.0.120d6a5488Vp88&mp=1&gatewayAdapt=glo2ita or on amazon here https://www.amazon.it/Xiaomi-Aspirapolvere-Lavapavimenti-Autosvuotamento-Aspirazione/dp/B0BW4LVTTD?crid=2LNSCK9J3HQJ9&dib=eyJ2IjoiMSJ9.dZxJKspNfsNblp1QM7ZbYGQmCqV5J49Iw1e8DRkZmLGAIit1fx5tn2g1zp5NyOPzqRK1R1DeHVHOCAl88mqeHxsiVCXOKyiO7UjAP3TAnPFnXO-qYaFVaAqB8Wp0pKFnwqz1yj2aITjVjJBvxbDO3s1VDxNs9xtYOOL7LWLTWW07tMZVqOtOFKsLQlTWp10tb6bfx1RwxJgUMcwYtYFfkPOOyVGLm7fuyfZjWqkLilY.JoQoL7eLKKUbcG8lcpzDVED_8RQhyoa3arHaCVN-Cdk&dib_tag=se&keywords=robot%2Blavapavimenti%2Be%2Baspirapolvere&qid=1730369422&s=kitchen&sprefix=robot%2Blava%2Ckitchen%2C121&sr=1-9&ufe=app_do%3Aamzn1.fos.9d4f9b77-768c-4a4e-94ad-33674c20ab35&th=1'),
+            {}
+        )
+
+        self.assertEqual(h.last_message, 'Message by name  with Amazon affiliate link:\n\nyou can find on ali https://it.aliexpress.com/item/1005007703420314.html?tag=TEST_ALI or on amazon here https://www.amazon.com/dp/B0BW4LVTTD?tag=TEST')
 
 
 if __name__ == '__main__':

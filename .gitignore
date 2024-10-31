@@ -1,1 +1,33 @@
-venv
+# Compiled source
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environments
+venv/
+.env
+
+# Testing files
+.coverage
+nosetests.xml
+coverage.xml
+*.cover
+.pytest_cache/
+.hypothesis/
+
+# Django specific files
+db.sqlite3
+local_settings.py
+
+# Flask specific files
+instance/
+
+# Logs
+*.log
+
+# Documentation builds
+docs/_build/
+
+# IDEs and editors
+.idea/
+.vscode/
