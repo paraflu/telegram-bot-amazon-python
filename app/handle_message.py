@@ -8,11 +8,10 @@ from telegram import Update, Chat
 
 from .amazon import AmazonSettings
 from .log import log
-from .shorten_links import ShortenLinks, shorten_url
+from .shorten_links import ShortenLinks
 
 
 class AffiliateMessageHandler:
-  
 
     ALI_TAG = os.environ.get('ALI_TAG')
     ALI_TLD = os.environ.get('ALI_TLD', 'com')
@@ -39,9 +38,9 @@ class AffiliateMessageHandler:
         self.affiliates = [
             AmazonSettings
         ]
-        
-    def build_affiliate_url(self,affiliate, asin):
-        return f'https://www.amazon.{affiliate.STORE_TLD}/dp/{asin}?tag={affiliate.STORE_TAG}'
+
+    # def build_affiliate_url(self, affiliate, asin):
+    #     return f'https://www.amazon.{affiliate.STORE_TLD}/dp/{asin}?tag={affiliate.STORE_TAG}'
 
     def build_raw_affiliate_url(element):
         url = element.get('expanded_url') or element['full_url']
@@ -52,9 +51,9 @@ class AffiliateMessageHandler:
         return parsed_url._replace(query=new_query).geturl()
 
     async def get_affiliate_url(self, affiliate, element):
-        url = self.build_affiliate_url(affiliate, element['asin']) if element.get(
+        url = affiliate.build_affiliate_url(element['asin']) if element.get(
             'asin') else self.build_raw_affiliate_url(element)
-        return await shorten_url(url) if ShortenLinks.SHORTEN_LINKS else url
+        return await ShortenLinks.shorten_url(url) if ShortenLinks.SHORTEN_LINKS else url
 
     async def get_long_url(self, short_url: str, chain_depth=0):
         try:
@@ -84,7 +83,7 @@ class AffiliateMessageHandler:
             log(f"Short URL {short_url} -> ERROR: {e}")
             return None
 
-    def get_asin_from_full_url(self, url: str, full_reg_exp:re):
+    def get_asin_from_full_url(self, url: str, full_reg_exp: re):
         match = full_reg_exp.search(url)
         return match.group(8) if match else url
 
@@ -98,14 +97,15 @@ class AffiliateMessageHandler:
         if self.is_group(chat):
             affiliate_message = message
             for element in replacements:
-                sponsored_url = await self.get_affiliate_url(replacements['affiliate'], element)
-                affiliate_message = affiliate_message.replace(
-                    element['full_url'], sponsored_url)
+                for replacement in replacements:
+                    sponsored_url = await self.get_affiliate_url(replacement['affiliate'], element)
+                    affiliate_message = affiliate_message.replace(
+                        element['full_url'], sponsored_url)
             return AffiliateMessageHandler.GROUP_REPLACEMENT_MESSAGE.replace('\\n', '\n').replace('{USER}', self.build_mention(user)).replace('{STORE}', 'Amazon').replace('{MESSAGE}', affiliate_message).replace('{ORIGINAL_MESSAGE}', message)
         else:
             if len(replacements) > 1:
                 text = '\n'.join(f"• {await self.get_affiliate_url(replacements['affiliate'],
-                    element)}" for element in replacements)
+                                                                   element)}" for element in replacements)
             else:
                 text = await self.get_affiliate_url(replacements['affiliate'], replacements[0])
             return text
@@ -178,12 +178,12 @@ class AffiliateMessageHandler:
                     for affiliate in self.affiliates:
                         for match in affiliate.RAW_URL_REGEX.finditer(text):
                             replacements.append(
-                                {'affiliate': affiliate,'asin': None, 'full_url': match.group()})
+                                {'affiliate': affiliate, 'asin': None, 'full_url': match.group()})
                 else:
                     for affiliate in self.affiliates:
                         for match in affiliate.FULL_URL_REGEX.finditer(text):
                             replacements.append(
-                                {'affiliate': affiliate,'asin': match.group(8), 'full_url': match.group()})
+                                {'affiliate': affiliate, 'asin': match.group('asin'), 'full_url': match.group()})
 
                 for affiliate in self.affiliates:
                     for match in affiliate.SHORT_URL_REGEX.finditer(text):
